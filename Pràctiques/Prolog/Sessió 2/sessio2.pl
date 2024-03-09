@@ -1,6 +1,11 @@
 %%% PROGRAMES QUE PODEM UTILITZAR %%%
 %%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%% %%%
 
+% removeOne(X,L1,L2) => L2 es L1 amb una ocurrència menys de X.
+remove_one(_,[],[]).
+remove_one(X,[X|L1],L1).
+remove_one(X,[Y|L1],[Y|L2]) :- X=Y,remove_one(X,L1,L2).
+
 % count(L,X,N) => N es el nombre de vegades que X apareix a L.
 count([],_,0).
 count([X|Xs],X,N) :- count(Xs,X,Np), N is Np+1.
@@ -41,9 +46,69 @@ sort_insert_([],[]).
 sort_insert_([X|Xs], Ls) :- sort_insert_(Xs, Temp), insert_(X, Temp, Ls).
 
 % union_(Xs, Ys, Zs) => Zs = Xs unio Ys
-union_(Xs, Ys, Zs) :- append(Xs,Ys,R), quicksort(R, Zs). 
+union_(Xs, Ys, Zs) :- append(Xs,Ys,R), quicksort(R, Zs). %ESTÀ MALAMENT CAGAMOS
 
-% intersection_(Xs, Ys, Zs) => Zs = Xs interseccio Ys
-intersection([],_,[]).
-intersection_([X|Xs], Ys, [X|Zs]) :- member(X, Ys), intersection_(Xs,Ys,Zs).
-intersection_([_|Xs],Ys, Zs) :- intersection_(Xs,Ys,Zs).
+% inter(Xs, Ys, Zs) => Zs = Xs interseccio Ys
+inter([], _, []).
+
+inter([H1|T1], L2, [H1|Res]) :-
+    member(H1, L2),
+    remove_one(H1, L2, Aux),
+    inter(T1, Aux, Res).
+
+inter([_|T1], L2, Res) :-
+    inter(T1, L2, Res).
+
+% difference_(Xs, Ys, Zs) => Zs = Xs \ Ys
+% difference_(Xs, Ys, Zs) :- .
+
+% multiset_to_set_(Xs, Zs) => Zs is Xs sense repeticions
+multiset_to_set_([],[]).
+multiset_to_set_(Xs, Zs) :- sort(Xs, Zs).
+
+% sum_(L,N) => N es la suma dels elements de L
+sum_([],0).
+sum_([L1|L], N) :- sum_(L,R), N is R + L1.
+
+% sum_even_(L,N) => N es la suma dels nombres parells de L
+sum_even_([],0).
+sum_even_([L1|L], N) :- sum_even_(L,R), 0 is L1 mod 2, N is R + L1.
+sum_even_([L1|L], N) :- sum_even_(L,R), 1 is L1 mod 2, N is R + 0. % preguntar perquè sense el "1 is L1 mod 2" no va bé la cosa :P
+
+% gcd_(A, B, M) => M es el maxim comu divisor de A i B
+gcd_(N1, N2, R) :- N1 = N2, R = N1. 
+gcd_(N1, N2, R) :-
+    N1 < N2,
+    Aux is N2 - N1,
+    gcd_(N1, Aux, R).
+gcd_(N1, N2, R) :-
+    N1 > N2,
+    gcd_(N2,N1,R).
+
+% paths(E,X,Y,P) 
+% E son les arestes d'un graf dirigit aciclic.
+% La llista P conte un cami de X a Y.
+paths(E,X,Y,P) :- member(ar(X,Y),E), P=[X,Y].
+paths(E,X,Y,P) :- member(ar(X,Z),E), paths(E,Z,Y, Aux), P=[X|Aux].
+
+
+% clique(g(V,E),C) 
+% V,E son els nodes i arestes d'un graf. 
+% Les arestes son parelles ordenades de nodes ar(N1,N2) tal que N1 < N2
+% La llista C conte un clique ordenat del graf g(V,E).
+clique(g(V,E),C) :- .
+
+%Exemples d'execucio
+
+%clique(g([1,2,3],[ar(1,2),ar(1,3),ar(2,3)],C).
+%C = [1] ? ;
+%C = [2] ? ;
+%C = [3] ? ;
+%C = [1,2] ? ;
+%C = [1,3] ? ;
+%C = [2,3] ? ;
+%C = [1,2,3] ? ;
+
+%Graf de la sessio 1
+%findall(C,clique(g([1,2,3,4,5,6],[ar(1,2),ar(1,4),ar(1,6),ar(2,3),ar(2,4),ar(2,6),ar(3,4),ar(4,5),ar(4,6),ar(5,6)]),C),L).
+% L = [[1],[2],[3],[4],[5],[6],[1,2],[1,4],[1,6],[2,3],[2,4],[2,6],[3,4],[4,5],[4,6],[5,6],[1,2,4],[1,2,6],[1,4,6],[2,3,4],[2,4,6],[4,5,6],[1,2,4,6]]
