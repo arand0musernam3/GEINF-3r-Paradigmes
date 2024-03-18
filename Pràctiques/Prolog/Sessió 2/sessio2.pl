@@ -39,14 +39,14 @@ sublist_(A,B) :- prefix(X,B), suffix(A,X).
 palindrome_(L) :- reverse(Y,L), Y=L.
 
 % insert_(X, Xs, Ys) => Ys es el resultat d'inserir ordenadament X a Xs, assumint que Xs esta en ordre ascendent
-insert_(X, Xs, Ys) :- split(X, Xs, LEQ, GT), append(LEQ, [X], LEQX), append(LEQX, GT, R), R = Ys.
+insert_(X, Xs, Ys) :- split(X, Xs, LEQ, GT), append(LEQ, [X], LEQX), append(LEQX, GT, Ys).
 
 % sortinsert_(L, Ls) => Ls es la llista L ordenada. Feu servir insert
 sort_insert_([],[]).
 sort_insert_([X|Xs], Ls) :- sort_insert_(Xs, Temp), insert_(X, Temp, Ls).
 
 % union_(Xs, Ys, Zs) => Zs = Xs unio Ys
-union_(Xs, Ys, Zs) :- append(Xs,Ys,R), quicksort(R, Zs). %ESTÀ MALAMENT CAGAMOS
+union_(Xs, Ys, Zs) :- . %ESTÀ MALAMENT CAGAMOS
 
 % inter(Xs, Ys, Zs) => Zs = Xs interseccio Ys
 inter([], _, []).
@@ -96,7 +96,16 @@ paths(E,X,Y,P) :- member(ar(X,Z),E), paths(E,Z,Y, Aux), P=[X|Aux].
 % V,E son els nodes i arestes d'un graf. 
 % Les arestes son parelles ordenades de nodes ar(N1,N2) tal que N1 < N2
 % La llista C conte un clique ordenat del graf g(V,E).
-clique(g(V,E),C) :- .
+clique3(A,B,C) :- aresta(A,B), aresta(A,C), aresta(B,C).
+
+
+%clique4(A,B,C,D) => El conjunt {A,B,C,D} es un clique, i la sequencia A,B,C,D esta ordenada lexicograficament
+clique4(A,B,C,D) :- clique3(A,B,C), aresta(A,D), aresta(B,D), aresta(C,D).
+
+V is [1,2,3].
+E is [ar(1,2),ar(1,3),ar(2,3)].
+clique([],[],[]) :- V = [].
+
 
 %Exemples d'execucio
 
@@ -112,3 +121,4 @@ clique(g(V,E),C) :- .
 %Graf de la sessio 1
 %findall(C,clique(g([1,2,3,4,5,6],[ar(1,2),ar(1,4),ar(1,6),ar(2,3),ar(2,4),ar(2,6),ar(3,4),ar(4,5),ar(4,6),ar(5,6)]),C),L).
 % L = [[1],[2],[3],[4],[5],[6],[1,2],[1,4],[1,6],[2,3],[2,4],[2,6],[3,4],[4,5],[4,6],[5,6],[1,2,4],[1,2,6],[1,4,6],[2,3,4],[2,4,6],[4,5,6],[1,2,4,6]]
+
