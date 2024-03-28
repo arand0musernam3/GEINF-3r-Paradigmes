@@ -4,6 +4,16 @@
 % 	- Si nomes feu el solucionador: rowDef(+Hints,Ts,+Len): les indicacions de la fila venen donades
 %   - Si nomes feu el generador: rowDef(Hints,+Ts,+Len): el contingut de la fila ja ve donat
 
+% Hints podria ser [], [3] o [1,2] per exemple
+
+
+% rowDef(+Hints,Ts,+Len)
+rowDef([], [], 0).
+rowDef([Hint|[]], Ts, Len):- Len >= Hint, AuxLen is Len - Hint, length(VectAux, AuxLen), .
+rowDef([Hint|Rest],Ts,Len):- length([Hint|Rest], Len), length(Vect, Hint),
+                             AuxLen is Len - Hint, rowDef(Rest, TsAux, AuxLen), append(Vect, [0|TsAux], Ts).
+                             
+
 %rowDefNFullNHints(Hints,Ts,+Len,+NFull,+NHints) : Hints es la llista de llargada NHints. Hints son les indicacions de la fila Ts, que te llargada Len.
 % Podeu obviar aquest predicat, o assumir +Hints o +Ts si feu el solucionador o generador respectivament.
 
