@@ -41,6 +41,9 @@ rowDef([Hints],Ts,Len):- Len>=H, AuxLen is Len - 1, length(Hints, Aux), Aux > 0,
 %Exemple: mergeIntercal([a,a,a],[b,b],Zs).
 % Zs=[[a,b,a,b,a]] 
 
+mergeIntercal([X],[],[X]).
+mergeIntercal([X|Xs],[Y|Ys],[X,Y|Rs]):- mergeIntercal(Xs,Ys,Rs).
+
 %transpose(+Xs,Ys): Ys es la matriu (llista de llistes) Xs transposada. 
 % Assumim que es una matriu ben construida, es a dir, totes les files (subllistes) tenen la mateixa llargada.
 transpose([[]|_], []). %cal posar el [ []|_ ] perquè és el cas base (una de les files de la matriu és buida).
