@@ -5,9 +5,9 @@
 %   - Si nomes feu el generador: rowDef(Hints,+Ts,+Len): el contingut de la fila ja ve donat
 
 %FUCNIÓ PER ESCRIURE 0s
-escriureVector(Caract, 0, []).
-escriureVector(Caract, 1, [Caract]).
-escriureVector(Caract, Len, Res):- AuxLen is Len-1, AuxLen >= 1, escriureVector(Caract, AuxLen, AuxVect), append([Caract], AuxVect, Res). 
+escriureVector(_, 0, []).
+escriureVector(C, 1, [C]).
+escriureVector(Caract, Len, Res):- Len >= 1, AuxLen is Len-1, escriureVector(Caract, AuxLen, AuxVect), append([Caract], AuxVect, Res). 
 
 %cas base
 rowDef([], [], 0).
@@ -16,11 +16,11 @@ rowDef([], [], 0).
 rowDef([H|[]], Ts, Len):- Len>=H, escriureVector('x', H, AuxVectX), AuxLen is Len - H,
                             escriureVector('0', AuxLen, AuxVect0), append(AuxVectX, AuxVect0, Ts).
 %queden més pistes, primera vegada que arribes aquí
-rowDef([H|Hints],Ts,Len):- Len>H, length(Hints, Aux), Aux > 0, escriureVector('x', H, AuxVectH), append(AuxVectH, ['0'], AuxVectH0), 
+rowDef([H|Hints],Ts,Len):- Len>=H, length(Hints, Aux), Aux > 0, escriureVector('x', H, AuxVectH), append(AuxVectH, ['0'], AuxVectH0), 
                             AuxLen is Len - H - 1, rowDef(Hints, AuxVec, AuxLen), append(AuxVectH0, AuxVec, Ts).
 %afegir un 0 al davant i queden més pistes
-rowDef([Hints],Ts,Len):- Len>H, AuxLen is Len - 1, length(Hints, Aux), Aux > 0,
-                            rowDef(Hints,AuxVec,AuxLen), append(['0'], AuxVec, Ts). 
+rowDef([Hints],Ts,Len):- Len>=H, AuxLen is Len - 1, length(Hints, Aux), Aux > 0,
+                            rowDef(Hints,AuxVec,AuxLen), append(['0'], AuxVec, Ts).
 
 %[x, 0, x, x, 0], [x, 0, 0, x, x]
 
@@ -43,7 +43,15 @@ rowDef([Hints],Ts,Len):- Len>H, AuxLen is Len - 1, length(Hints, Aux), Aux > 0,
 
 %transpose(+Xs,Ys): Ys es la matriu (llista de llistes) Xs transposada. 
 % Assumim que es una matriu ben construida, es a dir, totes les files (subllistes) tenen la mateixa llargada.
+transpose([[]|_], []). %cal posar el [ []|_ ] perquè és el cas base (una de les files de la matriu és buida).
+transpose(Matrix, [Row|Rows]) :- transPrimeraColumna(Matrix, Row, RestMatrix), 
+                                 transpose(RestMatrix, Rows).
+                                % transposem la primera columna de la matriu i continuem amb la resta de la matriu i files.
 
+transPrimeraColumna([], [], []). %cas base, la transposada d'una llista buida és una llista buida.
+transPrimeraColumna([[H|T]|Rows], [H|Hs], [T|Ts]) :- transPrimeraColumna(Rows, Hs, Ts). % cas recursiu, agafem el primer element de la primera llista (H), l'afegim al resultat (H|Hs)
+                                                                                    % i la resta de la primera llista ho col·loquem a la continuació de la matriu (T|Ts).
+                                                                                    % llavors només queda cridar el mateix per a transposar la següent fila de la matriu.
 
 %sumHints(+L,+N): Els elements de la llista L (llista d'enters) sumen N. 
 % N esta instanciat, i llargada(L) esta instanciada, pero els valors de L no cal que estiguin instanciats.
@@ -58,6 +66,9 @@ rowDef([Hints],Ts,Len):- Len>H, AuxLen is Len - 1, length(Hints, Aux), Aux > 0,
 %no
 sumHints([], 0).
 sumHints([X|Xs],Y):- sumHints(Xs, R), Y is R+X. %va bé per comprovar però no per generar
+
+genSumHints([], 0).
+genSumHints([X,Xs], Y):- genSumHints(Xs, R), AuxLen is 
 
 %listOf(X,L,+N): L es una llista que conte N ocurrencies de X
 
