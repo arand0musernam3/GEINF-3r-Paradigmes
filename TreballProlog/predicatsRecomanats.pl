@@ -37,6 +37,32 @@ rowDef([Hints],Ts,Len):- Len>=H, AuxLen is Len - 1, length(Hints, Aux), Aux > 0,
 % XS = [['a','a','a'],[]] ? ;
 % no
 
+
+makeSublists(X, Xs, N):- length(Xs,Len), generateCombinationsList(Len,N,R), iMakeSublists(X,R,Xs).
+
+% Predicate to generate a list of non-negative integers that sums up to Sum
+sumHintsZero([], 0).
+sumHintsZero([X|Xs], Sum) :-
+    between(0, Sum, X),
+    NewSum is Sum - X,
+    sumHintsZero(Xs, NewSum).
+
+% Predicate to generate all combinations of lists that sum up to Sum
+generateCombinationsList(N, Sum, Combinations) :-
+    length(Combinations, N),       % Ensure Combinations has length N
+    sumHintsZero(Combinations, Sum).  % Generate list of length N with sum equal to Sum
+
+iMakeSublists(_,[],[]).
+iMakeSublists(Caract, [N|Ns], [List|Lists]):-
+    iMakeSublist(Caract, N, List),
+    iMakeSublists(Caract, Ns, Lists).
+
+iMakeSublist(_,0,[]).
+iMakeSublist(Caract,N,[Caract|Ns]):-
+    N>0,
+    AuxLen is N - 1,
+    iMakeSublist(Caract, AuxLen,Ns).
+
 %mergeIntercal(+Xs,+Ys,Zs) : llargada(Xs)=llargada(Ys)+1, i Zs es el resultat d'intercalar un element de cada llista, comencant per Xs
 %Exemple: mergeIntercal([a,a,a],[b,b],Zs).
 % Zs=[[a,b,a,b,a]] 
