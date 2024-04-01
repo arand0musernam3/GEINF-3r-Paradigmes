@@ -4,7 +4,7 @@
 % 	- Si nomes feu el solucionador: rowDef(+Hints,Ts,+Len): les indicacions de la fila venen donades
 %   - Si nomes feu el generador: rowDef(Hints,+Ts,+Len): el contingut de la fila ja ve donat
 
-%FUCNIÓ PER ESCRIURE 0s
+%FUCNIÓ PER ESCRIURE
 escriureVector(_, 0, []).
 escriureVector(C, 1, [C]).
 escriureVector(Caract, Len, Res):- Len >= 1, AuxLen is Len-1, escriureVector(Caract, AuxLen, AuxVect), append([Caract], AuxVect, Res). 
@@ -64,13 +64,14 @@ transPrimeraColumna([[H|T]|Rows], [H|Hs], [T|Ts]) :- transPrimeraColumna(Rows, H
 %X = 3
 %Y = 1 ? ;
 %no
-sumHints([], 0).
-sumHints([X|Xs],Y):- sumHints(Xs, R), Y is R+X. %va bé per comprovar però no per generar
 
-genSumHints([], 0).
-genSumHints([X,Xs], Y):- genSumHints(Xs, R), AuxLen is 
+sumHints([], 0).
+sumHints([X|Xs], Y):- between(1, Y, X), Remaining is Y - X, sumHints(Xs, Remaining).
+
 
 %listOf(X,L,+N): L es una llista que conte N ocurrencies de X
+listOf(_, [], 0).
+listOf(Caract, [Caract|Res], Len):- Len > 0, AuxLen is Len-1, listOf(Caract, Res, AuxLen). 
 
 %Jocs de proves (feu-ne mes vosaltres!)
 
