@@ -4,6 +4,26 @@
 % 	- Si nomes feu el solucionador: rowDef(+Hints,Ts,+Len): les indicacions de la fila venen donades
 %   - Si nomes feu el generador: rowDef(Hints,+Ts,+Len): el contingut de la fila ja ve donat
 
+%FUCNIÓ PER ESCRIURE 0s
+escriureVector(Caract, 0, []).
+escriureVector(Caract, 1, [Caract]).
+escriureVector(Caract, Len, Res):- AuxLen is Len-1, AuxLen >= 1, escriureVector(Caract, AuxLen, AuxVect), append([Caract], AuxVect, Res). 
+
+%cas base
+rowDef([], [], 0).
+
+%només queda una pista, cal emplenar fins al final
+rowDef([H|[]], Ts, Len):- Len>=H, escriureVector('x', H, AuxVectX), AuxLen is Len - H,
+                            escriureVector('0', AuxLen, AuxVect0), append(AuxVectX, AuxVect0, Ts).
+%queden més pistes, primera vegada que arribes aquí
+rowDef([H|Hints],Ts,Len):- Len>H, length(Hints, Aux), Aux > 0, escriureVector('x', H, AuxVectH), append(AuxVectH, ['0'], AuxVectH0), 
+                            AuxLen is Len - H - 1, rowDef(Hints, AuxVec, AuxLen), append(AuxVectH0, AuxVec, Ts).
+%afegir un 0 al davant i queden més pistes
+rowDef([Hints],Ts,Len):- Len>H, AuxLen is Len - 1, length(Hints, Aux), Aux > 0,
+                            rowDef(Hints,AuxVec,AuxLen), append(['0'], AuxVec, Ts). 
+
+%[x, 0, x, x, 0], [x, 0, 0, x, x]
+
 %rowDefNFullNHints(Hints,Ts,+Len,+NFull,+NHints) : Hints es la llista de llargada NHints. Hints son les indicacions de la fila Ts, que te llargada Len.
 % Podeu obviar aquest predicat, o assumir +Hints o +Ts si feu el solucionador o generador respectivament.
 
