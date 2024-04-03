@@ -5,19 +5,58 @@
 %   - Si nomes feu el generador: rowDef(Hints,+Ts,+Len): el contingut de la fila ja ve donat
 
 %cas base
-rowDef([], [], 0).
+rowDefSolver([], [], 0).
 
 %només queda una pista, cal emplenar fins al final
-rowDef([H|[]], Ts, Len):- Len>=H, listOf('x', AuxVectX, H), AuxLen is Len - H,
+rowDefSolver([H|[]], Ts, Len):- Len>=H, listOf('x', AuxVectX, H), AuxLen is Len - H,
                             listOf(0, AuxVect0, AuxLen), append(AuxVectX, AuxVect0, Ts).
 
 %queden més pistes, primera vegada que arribes aquí
-rowDef([H|Hints],Ts,Len):- Len>=H, length(Hints, Aux), Aux > 0, listOf('x', AuxVectH, H), append(AuxVectH, [0], AuxVectH0), 
-                            AuxLen is Len - H - 1, rowDef(Hints, AuxVec, AuxLen), append(AuxVectH0, AuxVec, Ts).
+rowDefSolver([H|Hints],Ts,Len):- Len>=H, length(Hints, Aux), Aux > 0, listOf('x', AuxVectH, H), append(AuxVectH, [0], AuxVectH0), 
+                            AuxLen is Len - H - 1, rowDefSolver(Hints, AuxVec, AuxLen), append(AuxVectH0, AuxVec, Ts).
 
 %afegir un 0 al davant i queden més pistes
-rowDef([H|Hints],Ts,Len):- Len>=H, AuxLen is Len - 1, length([H|Hints], Aux), Aux > 0,
-                            rowDef([H|Hints],AuxVec,AuxLen), append([0], AuxVec, Ts).
+rowDefSolver([H|Hints],Ts,Len):- Len>=H, AuxLen is Len - 1, length([H|Hints], Aux), Aux > 0,
+                            rowDefSolver([H|Hints],AuxVec,AuxLen), append([0], AuxVec, Ts).
+
+
+rowDefGenerator([],[],0).
+
+rowDefGenerator([1],['x'],1).
+
+rowDefGenerator([],[0],1).
+
+rowDefGenerator(Hints,[0|Ts],Len):-
+    AuxLen is Len - 1,
+    rowDefGenerator(Hints,Ts,AuxLen).
+
+rowDefGenerator(Hints,['x'|Ts],Len):-
+    AuxLen is Len - 1,
+    rowDefGenerator(Hints,Ts,AuxLen).
+
+
+% Predicate to count consecutive 1 sublists
+count_ones_sublists([], []).
+count_ones_sublists(List, Result) :-
+    count_ones_sublists(List, [], Result).
+
+count_ones_sublists([], Sublist, [Count]) :- %CAS ESPECIAL QUAN LA LLISTA ACABA EN 1
+    Sublist \= [],  %ens assegurem que almenys hi ha algun 1
+    length(Sublist, Count).
+
+count_ones_sublists([0|T], [], Counts) :- %QUAN TROBEM UN 0 I VENIM D'UN 0
+    count_ones_sublists(T, [], Counts).
+
+count_ones_sublists([1|T], Sublist, Counts) :- %TROBEM UN 1, ANEM FENT APPEND FINS QUE ARRIBI UN 0 (cas de sota)
+    append(Sublist, [1], NewSublist),
+    count_ones_sublists(T, NewSublist, Counts).
+
+count_ones_sublists([0|T], Sublist, [Count|Counts]) :- %QUAN TROBEM UN 0 I VENIM DE UN 1
+    Sublist \= [],
+    length(Sublist, Count),
+    count_ones_sublists(T, [], Counts).
+
+
 
 
 
