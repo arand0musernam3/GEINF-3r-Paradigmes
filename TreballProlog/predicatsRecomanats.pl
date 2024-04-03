@@ -9,15 +9,15 @@ rowDefSolver([], [], 0).
 
 %només queda una pista, cal emplenar fins al final
 rowDefSolver([H|[]], Ts, Len):- Len>=H, listOf('x', AuxVectX, H), AuxLen is Len - H,
-                            listOf(0, AuxVect0, AuxLen), append(AuxVectX, AuxVect0, Ts).
+                            listOf(' ', AuxVect0, AuxLen), append(AuxVectX, AuxVect0, Ts).
 
 %queden més pistes, primera vegada que arribes aquí
-rowDefSolver([H|Hints],Ts,Len):- Len>=H, length(Hints, Aux), Aux > 0, listOf('x', AuxVectH, H), append(AuxVectH, [0], AuxVectH0), 
+rowDefSolver([H|Hints],Ts,Len):- Len>=H, length(Hints, Aux), Aux > 0, listOf('x', AuxVectH, H), append(AuxVectH, [' '], AuxVectH0), 
                             AuxLen is Len - H - 1, rowDefSolver(Hints, AuxVec, AuxLen), append(AuxVectH0, AuxVec, Ts).
 
 %afegir un 0 al davant i queden més pistes
 rowDefSolver([H|Hints],Ts,Len):- Len>=H, AuxLen is Len - 1, length([H|Hints], Aux), Aux > 0,
-                            rowDefSolver([H|Hints],AuxVec,AuxLen), append([0], AuxVec, Ts).
+                            rowDefSolver([H|Hints],AuxVec,AuxLen), append([' '], AuxVec, Ts).
 
 
 rowDefGenerator([],[],0).
@@ -26,18 +26,18 @@ rowDefGenerator(Res, Ts, Len):-
     length(Ts,Len),
     countSublists(Ts,[],Res).
 
-countSublists([], Sublist, [Count]) :- %CAS ESPECIAL QUAN LA LLISTA ACABA EN 1
-    Sublist \= [],  %ens assegurem que almenys hi ha algun 1
+countSublists([], Sublist, [Count]) :- %CAS ESPECIAL QUAN LA LLISTA ACABA EN 'x'
+    Sublist \= [],  %ens assegurem que almenys hi ha alguna 'x'
     length(Sublist, Count).
 
-countSublists([0|Ts], [], CountVect) :- %QUAN TROBEM UN 0 I VENIM D'UN 0
+countSublists([' '|Ts], [], CountVect) :- %QUAN TROBEM UN ' ' I VENIM D'UN ' '
     countSublists(Ts, [], CountVect).
 
-countSublists(['x'|Ts], Sublist, CountVect) :- %TROBEM UN 1, ANEM FENT APPEND FINS QUE ARRIBI UN 0 (cas de sota)
+countSublists(['x'|Ts], Sublist, CountVect) :- %TROBEM UNA 'x', ANEM FENT APPEND FINS QUE ARRIBI UN ' ' (cas de sota)
     append(Sublist, ['x'], NewSublist),
     countSublists(Ts, NewSublist, CountVect).
 
-countSublists([0|Ts], Sublist, [Count|CountVect]) :- %QUAN TROBEM UN 0 I VENIM DE UN 1
+countSublists([' '|Ts], Sublist, [Count|CountVect]) :- %QUAN TROBEM UN ' ' I VENIM DE UNA 'x'
     Sublist \= [],
     length(Sublist, Count),
     countSublists(Ts, [], CountVect).
@@ -142,4 +142,38 @@ listOf(Caract, [Caract|Res], Len):- Len > 0, AuxLen is Len-1, listOf(Caract, Res
 %nonoBidirec(5,5,[IF1,[2,2],IF3,[3,IF4_2],[1]],[[4],[1,1],[2],[2],[2,1]],[['x',C22,' ','x','x'],['x','x',' ','x','x'],['x',' ',' ',' ',' '],['x','x','x',' ','x'],F5]).
 
 %nonoBidirecPrint(5,5,[_,[2,2],_,[3,_],[1]],[[4],[1,1],[2],[2],[2,1]],	[['x',_,' ','x','x'],['x','x',' ','x','x'],['x',' ',' ',' ',' '],['x','x','x',' ','x'],_]).
+
+totesCombinacionsFiles(Len,[], []).
+
+totesCombinacionsFiles(Len, [F|Fs],[Res|Resta]):-
+    findall(X, rowDefSolver(F,X,Len), Res),
+    totesCombinacionsFiles(Len,Fs,Resta).
+
+
+%1r param llista de llistes, segon param llista de llista que són totes les combinacions possibles
+generarTotesCombinacions([],[]).
+
+
+combine_lists([], _, _, []).
+combine_lists([X|Xs], Ys, Zs, Combinations) :-
+    combine_element(X, Ys, Zs, Combined),
+    combine_lists(Xs, Ys, Zs, Rest),
+    append(Combined, Rest, Combinations).
+
+combine_element(_, [], _, []).
+combine_element(X, [Y|Ys], Zs, Combined) :-
+    combine_element_with_z(X, Y, Zs, CombinedWithZ),
+    combine_element(X, Ys, Zs, Rest),
+    append(CombinedWithZ, Rest, Combined).
+
+combine_element_with_z(_, _, [], []).
+combine_element_with_z(X, Y, [Z|Zs], [[X,Y,Z]|Rest]) :-
+    combine_element_with_z(X, Y, Zs, Rest).
+
+
+
+
+
+
+
 
