@@ -26,6 +26,8 @@ rowDefGenerator(Res, Ts, Len):-
     length(Ts,Len),
     countSublists(Ts,[],Res).
 
+countSublists([],[],[]).
+
 countSublists([], Sublist, [Count]) :- %CAS ESPECIAL QUAN LA LLISTA ACABA EN 'x'
     Sublist \= [],  %ens assegurem que almenys hi ha alguna 'x'
     length(Sublist, Count).
@@ -143,6 +145,10 @@ listOf(Caract, [Caract|Res], Len):- Len > 0, AuxLen is Len-1, listOf(Caract, Res
 
 %nonoBidirecPrint(5,5,[_,[2,2],_,[3,_],[1]],[[4],[1,1],[2],[2],[2,1]],	[['x',_,' ','x','x'],['x','x',' ','x','x'],['x',' ',' ',' ',' '],['x','x','x',' ','x'],_]).
 
+
+% ============================================ SOLUCIONADOR ============================================
+
+%retorna totes les possibles combinacions de files per una matriu
 totesCombinacionsFiles(Len,[], []).
 
 totesCombinacionsFiles(Len, [F|Fs],[Res|Resta]):-
@@ -151,31 +157,56 @@ totesCombinacionsFiles(Len, [F|Fs],[Res|Resta]):-
 
 
 %1r param llista de llistes, segon param llista de llista que són totes les combinacions possibles
-generarTotesCombinacions([],[]).
-generarTotesCombinacions([[X|Xs]|Ys],Combinations):-
-    
+% cas base, si només hi ha una llista retornem tots els elements de la llista
+generarTotesCombinacions([List], Combinations) :-
+    findall([X], member(X, List), Combinations).
+
+%cas recursiu, per cada llista generem les combinacions amb els elements de les altres llistes.
+generarTotesCombinacions([List1, List2|T], Combinations) :-
+    generarTotesCombinacions([List2|T], Combinations2),
+    findall([X|Y], (member(X, List1), member(Y, Combinations2)), Combinations).
 
 
-combine_lists([], _, _, []).
-combine_lists([X|Xs], Ys, Zs, Combinations) :-
-    combine_element(X, Ys, Zs, Combined),
-    combine_lists(Xs, Ys, Zs, Rest),
-    append(Combined, Rest, Combinations).
+%donada una llista de files i una llista de pistes, comprova si les files compleixen les pistes
+comprovarFiles(_,[],[]).
 
-combine_element(_, [], _, []).
-combine_element(X, [Y|Ys], Zs, Combined) :-
-    combine_element_with_z(X, Y, Zs, CombinedWithZ),
-    combine_element(X, Ys, Zs, Rest),
-    append(CombinedWithZ, Rest, Combined).
+comprovarFiles(Len, [Pista|Pistes],[Fila|LlistaFiles]):-
+    rowDefSolver(Pista,Fila,Len),
+    comprovarFiles(Len,Pistes,LlistaFiles).
 
-combine_element_with_z(_, _, [], []).
-combine_element_with_z(X, Y, [Z|Zs], [[X,Y,Z]|Rest]) :-
-    combine_element_with_z(X, Y, Zs, Rest).
+testejarMatrius(_,_,_,_,[],_):-fail.
 
+testejarMatrius(NF,NC,IF,IC,[Mat|LlistaMatrius],Mat):-
+    transpose(Mat, Columnes),
+    comprovarFiles(NC,IF,Mat),
+    comprovarFiles(NF,IC,Columnes).
 
-
+testejarMatrius(NF,NC,IF,IC,[Mat|LlistaMatrius],G):-
+    testejarMatrius(NF,NC,IF,IC,LlistaMatrius,G).
 
 
+solucionarNono(NF,NC,IF,IC,G):-
+    totesCombinacionsFiles(NC, IF, TotesCombinacionsFiles),
+    generarTotesCombinacions(TotesCombinacionsFiles,TotesMatriusPossibles),
+    testejarMatrius(NF,NC,IF,IC,TotesMatriusPossibles,G).
 
+% ======================================================================================================
 
+% ============================================= GENERADOR ==============================================
+generarFila(_,[],[]).
 
+generarFila(Len, [Pista|Pistes],[Fila|Files]):-
+    rowDefGenerator(Pista, Fila, Len),
+    generarFila(Len, Pistes, Files).
+
+generarNono(NF,NC,IF,IC,G):-
+    transpose(G,Columnes),
+    generarFila(NC,IF,G),
+    generarFila(NF,IC,Columnes).
+% ======================================================================================================
+
+% =============================================== PRINT ================================================
+% ======================================================================================================
+
+% ============================================== POPURRI ===============================================
+% ======================================================================================================
