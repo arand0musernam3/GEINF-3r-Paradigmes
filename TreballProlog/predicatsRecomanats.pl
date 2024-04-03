@@ -152,6 +152,8 @@ totesCombinacionsFiles(Len, [F|Fs],[Res|Resta]):-
 
 %1r param llista de llistes, segon param llista de llista que són totes les combinacions possibles
 generarTotesCombinacions([],[]).
+generarTotesCombinacions([[X|Xs]|Ys],Combinations):-
+    
 
 
 combine_lists([], _, _, []).
