@@ -143,6 +143,8 @@ listOf(Caract, [Caract|Res], Len):- Len > 0, AuxLen is Len-1, listOf(Caract, Res
 
 %nonoBidirecPrint(5,5,[_,[2,2],_,[3,_],[1]],[[4],[1,1],[2],[2],[2,1]],	[['x',_,' ','x','x'],['x','x',' ','x','x'],['x',' ',' ',' ',' '],['x','x','x',' ','x'],_]).
 
+
+
 totesCombinacionsFiles(Len,[], []).
 
 totesCombinacionsFiles(Len, [F|Fs],[Res|Resta]):-
@@ -151,31 +153,23 @@ totesCombinacionsFiles(Len, [F|Fs],[Res|Resta]):-
 
 
 %1r param llista de llistes, segon param llista de llista que són totes les combinacions possibles
-generarTotesCombinacions([],[]).
-generarTotesCombinacions([[X|Xs]|Ys],Combinations):-
+% cas base, si només hi ha una llista retornem tots els elements de la llista
+generarTotesCombinacions([List], Combinations) :-
+    findall([X], member(X, List), Combinations).
+
+%cas recursiu, per cada llista generem les combinacions amb els elements de les altres llistes.
+generarTotesCombinacions([List1, List2|T], Combinations) :-
+    generarTotesCombinacions([List2|T], Combinations2),
+    findall([X|Y], (member(X, List1), member(Y, Combinations2)), Combinations).
+
+%testejarMatrius(IF,)
+%testejarMatrius(IF,IC,LlistaMatrius,G):-
     
 
 
-combine_lists([], _, _, []).
-combine_lists([X|Xs], Ys, Zs, Combinations) :-
-    combine_element(X, Ys, Zs, Combined),
-    combine_lists(Xs, Ys, Zs, Rest),
-    append(Combined, Rest, Combinations).
-
-combine_element(_, [], _, []).
-combine_element(X, [Y|Ys], Zs, Combined) :-
-    combine_element_with_z(X, Y, Zs, CombinedWithZ),
-    combine_element(X, Ys, Zs, Rest),
-    append(CombinedWithZ, Rest, Combined).
-
-combine_element_with_z(_, _, [], []).
-combine_element_with_z(X, Y, [Z|Zs], [[X,Y,Z]|Rest]) :-
-    combine_element_with_z(X, Y, Zs, Rest).
 
 
-
-
-
-
-
-
+solucionarNono(NF,NC,IF,IC,G):-
+    totesCombinacionsFiles(NC, IF, TotesCombinacionsFiles),
+    generarTotesCombinacions(TotesCombinacionsFiles,TotesMatriusPossibles),
+    testejarMatrius(IF,IC,TotesMatriusPossibles,G).
