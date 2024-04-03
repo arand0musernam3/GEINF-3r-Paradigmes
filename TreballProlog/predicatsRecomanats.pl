@@ -22,39 +22,25 @@ rowDefSolver([H|Hints],Ts,Len):- Len>=H, AuxLen is Len - 1, length([H|Hints], Au
 
 rowDefGenerator([],[],0).
 
-rowDefGenerator([1],['x'],1).
+rowDefGenerator(Res, Ts, Len):-
+    length(Ts,Len),
+    countSublists(Ts,[],Res).
 
-rowDefGenerator([],[0],1).
-
-rowDefGenerator(Hints,[0|Ts],Len):-
-    AuxLen is Len - 1,
-    rowDefGenerator(Hints,Ts,AuxLen).
-
-rowDefGenerator(Hints,['x'|Ts],Len):-
-    AuxLen is Len - 1,
-    rowDefGenerator(Hints,Ts,AuxLen).
-
-
-% Predicate to count consecutive 1 sublists
-count_ones_sublists([], []).
-count_ones_sublists(List, Result) :-
-    count_ones_sublists(List, [], Result).
-
-count_ones_sublists([], Sublist, [Count]) :- %CAS ESPECIAL QUAN LA LLISTA ACABA EN 1
+countSublists([], Sublist, [Count]) :- %CAS ESPECIAL QUAN LA LLISTA ACABA EN 1
     Sublist \= [],  %ens assegurem que almenys hi ha algun 1
     length(Sublist, Count).
 
-count_ones_sublists([0|T], [], Counts) :- %QUAN TROBEM UN 0 I VENIM D'UN 0
-    count_ones_sublists(T, [], Counts).
+countSublists([0|Ts], [], CountVect) :- %QUAN TROBEM UN 0 I VENIM D'UN 0
+    countSublists(Ts, [], CountVect).
 
-count_ones_sublists([1|T], Sublist, Counts) :- %TROBEM UN 1, ANEM FENT APPEND FINS QUE ARRIBI UN 0 (cas de sota)
-    append(Sublist, [1], NewSublist),
-    count_ones_sublists(T, NewSublist, Counts).
+countSublists(['x'|Ts], Sublist, CountVect) :- %TROBEM UN 1, ANEM FENT APPEND FINS QUE ARRIBI UN 0 (cas de sota)
+    append(Sublist, ['x'], NewSublist),
+    countSublists(Ts, NewSublist, CountVect).
 
-count_ones_sublists([0|T], Sublist, [Count|Counts]) :- %QUAN TROBEM UN 0 I VENIM DE UN 1
+countSublists([0|Ts], Sublist, [Count|CountVect]) :- %QUAN TROBEM UN 0 I VENIM DE UN 1
     Sublist \= [],
     length(Sublist, Count),
-    count_ones_sublists(T, [], Counts).
+    countSublists(Ts, [], CountVect).
 
 
 
