@@ -144,7 +144,9 @@ listOf(Caract, [Caract|Res], Len):- Len > 0, AuxLen is Len-1, listOf(Caract, Res
 %nonoBidirecPrint(5,5,[_,[2,2],_,[3,_],[1]],[[4],[1,1],[2],[2],[2,1]],	[['x',_,' ','x','x'],['x','x',' ','x','x'],['x',' ',' ',' ',' '],['x','x','x',' ','x'],_]).
 
 
+% ============================================ SOLUCIONADOR ============================================
 
+%retorna totes les possibles combinacions de files per una matriu
 totesCombinacionsFiles(Len,[], []).
 
 totesCombinacionsFiles(Len, [F|Fs],[Res|Resta]):-
@@ -162,14 +164,32 @@ generarTotesCombinacions([List1, List2|T], Combinations) :-
     generarTotesCombinacions([List2|T], Combinations2),
     findall([X|Y], (member(X, List1), member(Y, Combinations2)), Combinations).
 
-%testejarMatrius(IF,)
-%testejarMatrius(IF,IC,LlistaMatrius,G):-
-    
 
+%donada una llista de files i una llista de pistes, comprova si les files compleixen les pistes
+comprovarFiles(_,[],[]).
 
+comprovarFiles(Len, [Pista|Pistes],[Fila|LlistaFiles]):-
+    rowDefSolver(Pista,Fila,Len),
+    comprovarFiles(Len,Pistes,LlistaFiles).
+
+testejarMatrius(_,_,_,_,[],_):-fail.
+
+testejarMatrius(NF,NC,IF,IC,[Mat|LlistaMatrius],Mat):-
+    transpose(Mat, Columnes),
+    comprovarFiles(NC,IF,Mat),
+    comprovarFiles(NF,IC,Columnes).
+
+testejarMatrius(NF,NC,IF,IC,[Mat|LlistaMatrius],G):-
+    testejarMatrius(NF,NC,IF,IC,LlistaMatrius,G).
 
 
 solucionarNono(NF,NC,IF,IC,G):-
     totesCombinacionsFiles(NC, IF, TotesCombinacionsFiles),
     generarTotesCombinacions(TotesCombinacionsFiles,TotesMatriusPossibles),
-    testejarMatrius(IF,IC,TotesMatriusPossibles,G).
+    testejarMatrius(NF,NC,IF,IC,TotesMatriusPossibles,G).
+
+% ======================================================================================================
+
+% ============================================= GENERADOR ==============================================
+
+% ======================================================================================================
