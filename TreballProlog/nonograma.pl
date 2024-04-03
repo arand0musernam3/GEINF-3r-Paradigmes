@@ -1,30 +1,37 @@
 % consult(predicatsRecomanats). % inclou el fitxer "predicatsRecomanats.pl"
 
 nonoPrint(NF,NC,IF,IC,G) :- 
-    countSet(NF,NF_count), countSet(NC,NC_count), 
-    max_list(NF_count,NF_space), max_list(NC_count, NC_space), 
-    preprocessIC(NC_space,NC_count,IC,IC_processed), transpose(IC_processed, IC_printable), printHead(NF_space,NC,IC_printable), 
-    printMult('-',NF_space), printMult('-',NC), print('\n').
+    countSet(IF,IF_count), countSet(IC,IC_count), 
+    max_list(IF_count,IF_space), max_list(IC_count, IC_space), 
+    preprocessIC(IC_space,IC_count,IC,IC_processed), transpose(IC_processed, IC_printable),
+    printHead(2*IF_space-1,IC_space,IC_printable), 
+    printMult('-',2*IF_space), printMult('-',2*NC-1), print('\n'),
+    preprocessIC(IF_space,IF_count,IF,IF_printable),
+    printBody(IF_printable,G), !.
 
-preprocessIC(Space,[This_count|NC_count],[This_IC|IC],[R,Res]) :- processColumn(Space,This_count,This_IC,RAux), reverse(RAux,R), preprocessIC(Space,NC_count,This_IC,Res).
+preprocessIC(_,[],[],[]).
+preprocessIC(Space,[This_count|NC_count],[This_IC|IC],[R|Res]) :- This_IC \= [], processColumn(Space,This_count,This_IC,RAux), reverse(RAux,R), preprocessIC(Space,NC_count,IC,Res).
 
 processColumn(0,0,[],[]).
-processColumn(Size,0,[],[I|Column]) :- Size > 0, I is ' ', NextSize is Size - 1, processColumn(NextSize,0,[],Column).
+processColumn(Size,0,[],[I|Column]) :- Size > 0, I = ' ', NextSize is Size - 1, processColumn(NextSize,0,[],Column).
 processColumn(Size, Length, [H|Hints], [I|Column]) :- Length > 0, I is H, NextSize is Size - 1, NextLength is Length - 1, processColumn(NextSize, NextLength, Hints, Column).
 
-printHead(InitSpace,NC,[R|Rows]) :- printMult(' ',InitSpace), print('|'), printMult(' ',R), print("!\n"), NCnext is NC - 1, printHead(InitSpace,NCnext,Rows).
+printHead(_,0,[]).
+printHead(InitSpace,NC,[R|Rows]) :- NC > 0, printMult(' ',InitSpace), print('|'), printRow(R), print('\n'), NCnext is NC - 1, printHead(InitSpace,NCnext,Rows).
 
 countSet([],[]).
 countSet([I|Input],[R|Result]) :- length(I,R), countSet(Input,Result).
 
 printMult(_,0).
-printMult(C,N) :- print(C), Nnext is N - 1, printSpace(Nnext).
+printMult(C,N) :- N > 0, print(C), Nnext is N - 1, printMult(C,Nnext).
 
-printColumn([]).
-printColumn([R|G]) :- printRow(R), print('\n'), printColumn(G).
+printBody([],[]).
+printBody([H|Hints],[R|G]) :- printRow(H), print('|'), printRow(R), print('\n'), printBody(Hints,G).
 
 printRow([]).
-printRow([X|R]) :- print(X), print(' '), printRow(R).
+printRow([X|R]) :- print(X), printEnd(R), printRow(R).
+printEnd([]).
+printEnd(_) :- print(' ').
 
 
 
