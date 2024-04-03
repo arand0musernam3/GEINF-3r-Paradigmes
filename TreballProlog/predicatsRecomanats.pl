@@ -26,6 +26,8 @@ rowDefGenerator(Res, Ts, Len):-
     length(Ts,Len),
     countSublists(Ts,[],Res).
 
+countSublists([],[],[]).
+
 countSublists([], Sublist, [Count]) :- %CAS ESPECIAL QUAN LA LLISTA ACABA EN 'x'
     Sublist \= [],  %ens assegurem que almenys hi ha alguna 'x'
     length(Sublist, Count).
@@ -191,5 +193,14 @@ solucionarNono(NF,NC,IF,IC,G):-
 % ======================================================================================================
 
 % ============================================= GENERADOR ==============================================
+generarFila(_,[],[]).
 
+generarFila(Len, [Pista|Pistes],[Fila|Files]):-
+    rowDefGenerator(Pista, Fila, Len),
+    generarFila(Len, Pistes, Files).
+
+generarNono(NF,NC,IF,IC,G):-
+    transpose(G,Columnes),
+    generarFila(NC,IF,G),
+    generarFila(NF,IC,Columnes).
 % ======================================================================================================
