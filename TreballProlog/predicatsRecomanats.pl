@@ -53,7 +53,7 @@ nonoBidirecPrint(NF,NC,IF,IC,G):-
 
 % ============================================= WRAPPERS ===============================================
 
-solucionarNono(NF,NC,IF,IC,G) :- nonoBidirect(NF,NC,IF,IC,G).
+solucionarNono(NF,NC,IF,IC,G) :- nonoBidirec(NF,NC,IF,IC,G).
 solucionarNonoPrint(NF,NC,IF,IC,G) :- nonoBidirecPrint(NF,NC,IF,IC,G).
 generarNono(NF,NC,IF,IC,G) :- nonoBidirec(NF,NC,IF,IC,G).
 generarNonoPrint(NF,NC,IF,IC,G) :- nonoBidirecPrint(NF,NC,IF,IC,G).
