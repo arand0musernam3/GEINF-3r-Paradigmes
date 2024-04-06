@@ -68,14 +68,13 @@ nonoPrint(NF,NC,IF,IC,G) :-
     transpose(IC_processed, IC_printable), % proprocessIC retorna les pistes de columnes per columna. Transposa a files per imprimir com s'espera
     print('\n'), % Imprimeix un salt de línia (en cas de tenir més d'una solució, en prèmer el caràcter 'a' no es produeix un salt de línia automàtic)
     printHead(2*IF_space-1,IC_printable), % Imprimeix els espais, el separador vertical, i les pistes de columna.
-    printMult('-',2*IF_space), printMult('-',2*NC-1), print('\n'), % Imprimeix el separador horitzontal
+    Aux is 2*IF_space-1, printMult('-',Aux), print('-'), printMult('-',2*NC-1), print('\n'), % Imprimeix el separador horitzontal
     preprocessHints(IF_space,IF_count,IF,IF_printable), % Preprocessa les pistes de les files, posant espais perquè quedi ben imprès
     printBody(IF_printable,G), !. % Imprimeix el cos i para quan troba la primera solució
 
 % Preprocessa un conjunt de conjunts de pistes IC (amb subconjunts de llargada NC_count) amb un màxim d'espai Space. Res és el resultat
 preprocessHints(_,[],[],[]).
 preprocessHints(Space,[This_count|NC_count],[This_IC|IC],[R|Res]) :- 
-    This_IC \= [], % Mira que el conjunt no sigui buit
     reverse(This_IC,This_IC_aux), % Gira l'ordre de les pistes (prerrequisit de processColumn)
     processColumn(Space,This_count,This_IC_aux,RAux), % Processa
     reverse(RAux,R), % Gira l'ordre de les pistes AMB els espais (post requisit de processColumn)
@@ -96,6 +95,7 @@ countSet([],[]).
 countSet([I|Input],[R|Result]) :- length(I,R), countSet(Input,Result).
 
 % Imprimeix N cops C
+printMult(_,-1).
 printMult(_,0).
 printMult(C,N) :- N > 0, print(C), Nnext is N - 1, printMult(C,Nnext).
 
