@@ -4,25 +4,9 @@
 % 	- Si nomes feu el solucionador: rowDef(+Hints,Ts,+Len): les indicacions de la fila venen donades
 %   - Si nomes feu el generador: rowDef(Hints,+Ts,+Len): el contingut de la fila ja ve donat
 
-%cas base
-rowDefSolver([], [], 0).
+rowDef([],[],0).
 
-%només queda una pista, cal emplenar fins al final
-rowDefSolver([H|[]], Ts, Len):- Len>=H, listOf('x', AuxVectX, H), AuxLen is Len - H,
-                            listOf(' ', AuxVect0, AuxLen), append(AuxVectX, AuxVect0, Ts).
-
-%queden més pistes, primera vegada que arribes aquí
-rowDefSolver([H|Hints],Ts,Len):- Len>=H, length(Hints, Aux), Aux > 0, listOf('x', AuxVectH, H), append(AuxVectH, [' '], AuxVectH0), 
-                            AuxLen is Len - H - 1, rowDefSolver(Hints, AuxVec, AuxLen), append(AuxVectH0, AuxVec, Ts).
-
-%afegir un 0 al davant i queden més pistes
-rowDefSolver([H|Hints],Ts,Len):- Len>=H, AuxLen is Len - 1, length([H|Hints], Aux), Aux > 0,
-                            rowDefSolver([H|Hints],AuxVec,AuxLen), append([' '], AuxVec, Ts).
-
-
-rowDefGenerator([],[],0).
-
-rowDefGenerator(Res, Ts, Len):-
+rowDef(Res, Ts, Len):-
     length(Ts,Len),
     countSublists(Ts,[],Res).
 
@@ -152,7 +136,7 @@ listOf(Caract, [Caract|Res], Len):- Len > 0, AuxLen is Len-1, listOf(Caract, Res
 totesCombinacionsFiles(Len,[], []).
 
 totesCombinacionsFiles(Len, [F|Fs],[Res|Resta]):-
-    findall(X, rowDefSolver(F,X,Len), Res),
+    findall(X, rowDef(F,X,Len), Res),
     totesCombinacionsFiles(Len,Fs,Resta).
 
 
@@ -171,7 +155,7 @@ generarTotesCombinacions([List1, List2|T], Combinations) :-
 comprovarFiles(_,[],[]).
 
 comprovarFiles(Len, [Pista|Pistes],[Fila|LlistaFiles]):-
-    rowDefSolver(Pista,Fila,Len),
+    rowDef(Pista,Fila,Len),
     comprovarFiles(Len,Pistes,LlistaFiles).
 
 testejarMatrius(_,_,_,_,[],_):-fail.
@@ -186,27 +170,76 @@ testejarMatrius(NF,NC,IF,IC,[Mat|LlistaMatrius],G):-
 
 
 solucionarNono(NF,NC,IF,IC,G):-
+    length(IF,NF),
+    length(IC,NC),
     totesCombinacionsFiles(NC, IF, TotesCombinacionsFiles),
     generarTotesCombinacions(TotesCombinacionsFiles,TotesMatriusPossibles),
     testejarMatrius(NF,NC,IF,IC,TotesMatriusPossibles,G).
 
+
+solucionarNonoPrint(NF,NC,IF,IC,G):-
+    solucionarNono(NF,NC,IF,IC,G),
+    nonoPrint(NF,NC,IF,IC,G).
 % ======================================================================================================
 
 % ============================================= GENERADOR ==============================================
 generarFila(_,[],[]).
 
 generarFila(Len, [Pista|Pistes],[Fila|Files]):-
-    rowDefGenerator(Pista, Fila, Len),
+    rowDef(Pista, Fila, Len),
     generarFila(Len, Pistes, Files).
 
 generarNono(NF,NC,IF,IC,G):-
     transpose(G,Columnes),
     generarFila(NC,IF,G),
     generarFila(NF,IC,Columnes).
+
+generarNonoPrint(NF,NC,IF,IC,G):-
+    generarNono(NF,NC,IF,IC,G),
+    nonoPrint(NF,NC,IF,IC,G).
 % ======================================================================================================
 
 % =============================================== PRINT ================================================
+nonoPrint(NF,NC,IF,IC,G) :- 
+    countSet(IF,IF_count), countSet(IC,IC_count), 
+    max_list(IF_count,IF_space), max_list(IC_count, IC_space), 
+    preprocessIC(IC_space,IC_count,IC,IC_processed), transpose(IC_processed, IC_printable),
+    print('\n'),
+    printHead(2*IF_space-1,IC_space,IC_printable), 
+    printMult('-',2*IF_space), printMult('-',2*NC-1), print('\n'),
+    preprocessIC(IF_space,IF_count,IF,IF_printable),
+    printBody(IF_printable,G), !.
+
+preprocessIC(_,[],[],[]).
+preprocessIC(Space,[This_count|NC_count],[This_IC|IC],[R|Res]) :- This_IC \= [], processColumn(Space,This_count,This_IC,RAux), reverse(RAux,R), preprocessIC(Space,NC_count,IC,Res).
+
+processColumn(0,0,[],[]).
+processColumn(Size,0,[],[I|Column]) :- Size > 0, I = ' ', NextSize is Size - 1, processColumn(NextSize,0,[],Column).
+processColumn(Size, Length, [H|Hints], [I|Column]) :- Length > 0, I is H, NextSize is Size - 1, NextLength is Length - 1, processColumn(NextSize, NextLength, Hints, Column).
+
+printHead(_,0,[]).
+printHead(InitSpace,NC,[R|Rows]) :- NC > 0, printMult(' ',InitSpace), print('|'), printRow(R), print('\n'), NCnext is NC - 1, printHead(InitSpace,NCnext,Rows).
+
+countSet([],[]).
+countSet([I|Input],[R|Result]) :- length(I,R), countSet(Input,Result).
+
+printMult(_,0).
+printMult(C,N) :- N > 0, print(C), Nnext is N - 1, printMult(C,Nnext).
+
+printBody([],[]).
+printBody([H|Hints],[R|G]) :- printRow(H), print('|'), printRow(R), print('\n'), printBody(Hints,G).
+
+printRow([]).
+printRow([X|R]) :- print(X), printEnd(R), printRow(R).
+printEnd([]).
+printEnd(_) :- print(' ').
 % ======================================================================================================
 
 % ============================================== POPURRI ===============================================
+nonoBidirec(NF,NC,IF,IC,G) :-
+    nonoBidirec(NF,NC,IF,IC,G).
+
+nonoBidirecPrint(NF,NC,IF,IC,G):-
+    nonoBidirec(NF,NC,IF,IC,G),
+    nonoPrint(NF,NC,IF,IC,G).
 % ======================================================================================================
