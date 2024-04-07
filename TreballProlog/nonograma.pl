@@ -1,9 +1,9 @@
 %rowDef(Hints,Ts,+Len) : Hints es la llista d'indicacions per la fila Ts, que te llargada Len. ¡¡ Ni NHints ni Ts cal que estiguin instanciats !!
 rowDef([],[],0).
 
-rowDef(Res, Ts, Len):-
+rowDef(Hints, Ts, Len):-
     length(Ts,Len),
-    countSublists(Ts,[],Res).
+    countSublists(Ts,[],Hints).
 
 countSublists([],[],[]).
 
@@ -25,6 +25,7 @@ countSublists([' '|Ts], Sublist, [Count|CountVect]) :- %QUAN TROBEM UN ' ' I VEN
 
 %transpose(+Xs,Ys): Ys es la matriu (llista de llistes) Xs transposada. 
 % Assumim que es una matriu ben construida, es a dir, totes les files (subllistes) tenen la mateixa llargada.
+transpose([],[]):- !.
 transpose([[]|_], []). %cal posar el [ []|_ ] perquè és el cas base (una de les files de la matriu és buida).
 transpose(Matrix, [Row|Rows]) :- transPrimeraColumna(Matrix, Row, RestMatrix), 
                                  transpose(RestMatrix, Rows).
@@ -36,13 +37,17 @@ transPrimeraColumna([[H|T]|Rows], [H|Hs], [T|Ts]) :- transPrimeraColumna(Rows, H
                                                                                     % llavors només queda cridar el mateix per a transposar la següent fila de la matriu.
 
 % ============================================ NONOBIDIREC =============================================
-generarFila(_,[],[]).
+generarFila(Len,[],X).
 generarFila(Len, [Pista|Pistes],[Fila|Files]):-
     rowDef(Pista, Fila, Len),
     generarFila(Len, Pistes, Files).
 
 nonoBidirec(NF,NC,IF,IC,G):-
+    length(IF,NC),
+    length(IC,NF),
+    length(G,NF),
     generarFila(NC,IF,G),
+    length(Columnes, NC),
     transpose(G,Columnes),
     generarFila(NF,IC,Columnes).
 
