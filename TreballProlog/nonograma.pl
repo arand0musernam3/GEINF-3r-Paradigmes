@@ -5,6 +5,7 @@ rowDef(Hints, Ts, Len):-
     length(Ts,Len),
     countSublists(Ts,0,Hints).
 
+% countSublists(Ts,Subcount,CounVect) : 
 countSublists([],0,[]).
 
 countSublists([], Subcount, [Subcount]) :- %CAS ESPECIAL QUAN LA LLISTA ACABA EN 'x'
@@ -21,7 +22,7 @@ countSublists([' '|Ts], Subcount, [Subcount|CountVect]) :- %QUAN TROBEM UN ' ' I
     Subcount \= 0,
     countSublists(Ts, 0, CountVect).
 
-%transpose(+Xs,Ys): Ys es la matriu (llista de llistes) Xs transposada. 
+% transpose(+Xs,Ys): Ys es la matriu (llista de llistes) Xs transposada. 
 % Assumim que es una matriu ben construida, es a dir, totes les files (subllistes) tenen la mateixa llargada.
 transpose([],[]):- !.
 transpose([[]|_], []). %cal posar el [ []|_ ] perquè és el cas base (una de les files de la matriu és buida).
@@ -35,11 +36,14 @@ transPrimeraColumna([[H|T]|Rows], [H|Hs], [T|Ts]) :- transPrimeraColumna(Rows, H
                                                                                     % llavors només queda cridar el mateix per a transposar la següent fila de la matriu.
 
 % ============================================ NONOBIDIREC =============================================
-generarFila(_,[],X).
+
+% generarFila(+Len,Pistes,Files) : troba totes les files de llargada Len que compleixin les Pistes
+generarFila(_,[],[]).
 generarFila(Len, [Pista|Pistes],[Fila|Files]):-
     rowDef(Pista, Fila, Len),
     generarFila(Len, Pistes, Files).
 
+% nonoBidirec(+NF,+NC,IF,IC,G) : troba un taulell G de NF*NC i pistes IF i IC
 nonoBidirec(NF,NC,IF,IC,G):-
     length(IF,NC),
     length(IC,NF),
@@ -49,6 +53,8 @@ nonoBidirec(NF,NC,IF,IC,G):-
     transpose(G,Columnes),
     generarFila(NF,IC,Columnes).
 
+
+% nonoBidirecPrint(+NF,+NC,IF,IC,G) : troba un taulell G de NF*NC i pistes IF i IC. Dibuixa el resultat
 nonoBidirecPrint(NF,NC,IF,IC,G):-
     nonoBidirec(NF,NC,IF,IC,G),
     nonoPrint(NF,NC,IF,IC,G).
@@ -56,14 +62,22 @@ nonoBidirecPrint(NF,NC,IF,IC,G):-
 
 % ============================================= WRAPPERS ===============================================
 
+% solucionarNono(+NF,+NC,+IF,+IC,G) : troba un taulell G de NF*NC que cumpleixi amb les pistes IF i IC
 solucionarNono(NF,NC,IF,IC,G) :- nonoBidirec(NF,NC,IF,IC,G).
+
+% solucionarNonoPrint(+NF,+NC,+IF,+IC,G) : troba un taulell G de NF*NC que cumpleixi amb les pistes IF i IC. Dibuixa el resultat
 solucionarNonoPrint(NF,NC,IF,IC,G) :- nonoBidirecPrint(NF,NC,IF,IC,G).
+
+% generarNonoPrint(+NF,+NC,IF,IC,+G) : troba unes pistes IF i IC que cumpleixin un G de NF*NC
 generarNono(NF,NC,IF,IC,G) :- nonoBidirec(NF,NC,IF,IC,G).
+
+% generarNonoPrint(+NF,+NC,IF,IC,+G) : troba unes pistes IF i IC que cumpleixin un G de NF*NC. Dibuixa el resultat
 generarNonoPrint(NF,NC,IF,IC,G) :- nonoBidirecPrint(NF,NC,IF,IC,G).
 
 % ======================================================================================================
 
 % =============================================== PRINT ================================================
+% nonoPrint(+NF,+NC,+IF,+IC,+G) : Imprimeix un nono de NF*NC amb les pistes de files IF i columnes IC i el contingut G
 nonoPrint(NF,NC,IF,IC,G) :- 
     countSet(IF,IF_count), countSet(IC,IC_count), % Compta el nombre de pistes de cada fila i de cada columna respectivament
     max_list(IF_count,IF_space), max_list(IC_count, IC_space), % Mira quin es el conjunt de pistes més gran a les files i a les columnes
@@ -75,7 +89,7 @@ nonoPrint(NF,NC,IF,IC,G) :-
     preprocessHints(IF_space,IF_count,IF,IF_printable), % Preprocessa les pistes de les files, posant espais perquè quedi ben imprès
     printBody(IF_printable,G), !. % Imprimeix el cos i para quan troba la primera solució
 
-% Preprocessa un conjunt de conjunts de pistes IC (amb subconjunts de llargada NC_count) amb un màxim d'espai Space. Res és el resultat
+% preprocessHints(+Space,+NC_count,+IC,Res) : Preprocessa un conjunt de conjunts de pistes IC (amb subconjunts de llargada NC_count) amb un màxim d'espai Space. Res és el resultat
 preprocessHints(_,[],[],[]).
 preprocessHints(Space,[This_count|NC_count],[This_IC|IC],[R|Res]) :- 
     reverse(This_IC,This_IC_aux), % Gira l'ordre de les pistes (prerrequisit de processColumn)
@@ -83,34 +97,34 @@ preprocessHints(Space,[This_count|NC_count],[This_IC|IC],[R|Res]) :-
     reverse(RAux,R), % Gira l'ordre de les pistes AMB els espais (post requisit de processColumn)
     preprocessHints(Space,NC_count,IC,Res). % Preprocessa la següent
 
-% Retorna Column de mida Size, amb el contingut de Hints (de llargada Length) concatenat d'espais
+% processColumn(+Size,+Length,+Hints,Column) : Retorna Column de mida Size, amb el contingut de Hints (de llargada Length) concatenat d'espais
 processColumn(0,0,[],[]).
 processColumn(Size,0,[],[I|Column]) :- Size > 0, I = ' ', NextSize is Size - 1, processColumn(NextSize,0,[],Column).
 processColumn(Size, Length, [H|Hints], [I|Column]) :- Length > 0, I is H, NextSize is Size - 1, NextLength is Length - 1, processColumn(NextSize, NextLength, Hints, Column).
 
-% Imprimeix les pistes de columnes R deixant InitSpace a la esquerra
+% printHead(+InitSpace,+R) : Imprimeix les pistes de columnes R deixant InitSpace a la esquerra
 printHead(_,[]).
 printHead(InitSpace,[R|Rows]) :- printMult(' ',InitSpace), print('|'), printRow(R), print('\n'), printHead(InitSpace,Rows).
     % Espai, separador, pista, següent fila
 
-% I és una llista de n llistes, R és el resultat (una llista amb n llistes on R[n] és la llargada de I[n])
+% sountSet(+Input,Resolt) : I és una llista de n llistes, R és el resultat (una llista amb n llistes on R[n] és la llargada de I[n])
 countSet([],[]).
 countSet([I|Input],[R|Result]) :- length(I,R), countSet(Input,Result).
 
-% Imprimeix N cops C
-printMult(_,-1).
+% printMult(+C,+N) : Imprimeix N cops C
+printMult(_,-1). % En un moment de la impressió,es pot arribar a cridar aquest predicat amb N=-1
 printMult(_,0).
 printMult(C,N) :- N > 0, print(C), Nnext is N - 1, printMult(C,Nnext).
 
-% Imprimeix les pistes H de files i la matriu G línia per línia
+% printBody(+Hints,+G) : Imprimeix les pistes H de files i la matriu G línia per línia
 printBody([],[]).
 printBody([H|Hints],[R|G]) :- printRow(H), print('|'), printRow(R), print('\n'), printBody(Hints,G). % Pistes, separador, caselles, següent fila
 
-% Imprimeix una fila X posant espais entre caràcters
+% printRow(+R) : Imprimeix una fila X posant espais entre caràcters
 printRow([]).
 printRow([X|R]) :- print(X), printSeparator(R), printRow(R).
 
-% Imprimeix un espai si queden caràcters, altrament no imprimeix res
+% printSeparator(_) : Imprimeix un espai si queden caràcters, altrament no imprimeix res
 printSeparator([]).
 printSeparator(_) :- print(' ').
 % ======================================================================================================
