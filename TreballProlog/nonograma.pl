@@ -5,7 +5,7 @@ rowDef(Hints, Ts, Len):-
     length(Ts,Len),
     countSublists(Ts,[],Hints).
 
-% countSublists(Ts,Sublist,CounVect) : 
+% countSublists(Ts,Sublist,CounVect) : Cap paràmetre ha d'estar instanciat, però Ts ha de tenir la llargada definida
 countSublists([],[],[]).
 
 countSublists([], Sublist, [Count]) :- %CAS ESPECIAL QUAN LA LLISTA ACABA EN 'x'
@@ -38,7 +38,7 @@ transPrimeraColumna([[H|T]|Rows], [H|Hs], [T|Ts]) :- transPrimeraColumna(Rows, H
                                                                                     % llavors només queda cridar el mateix per a transposar la següent fila de la matriu.
 
 % ============================================ NONOBIDIREC =============================================
-% generarFila(+Len,Pistes,Files) : troba totes les files de llargada Len que compleixin les Pistes
+% generarFila(+Len,Pistes,Files) : troba totes les files de llargada Len que compleixin les Pistes, Pistes i Files no han d'estar instanciades però cal que tinguin la llargada definida
 generarFila(_,[],[]).
 generarFila(Len, [Pista|Pistes],[Fila|Files]):-
     rowDef(Pista, Fila, Len),
