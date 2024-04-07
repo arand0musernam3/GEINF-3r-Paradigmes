@@ -3,25 +3,23 @@ rowDef([],[],0).
 
 rowDef(Hints, Ts, Len):-
     length(Ts,Len),
-    countSublists(Ts,[],Hints).
+    countSublists(Ts,0,Hints).
 
-countSublists([],[],[]).
+countSublists([],0,[]).
 
-countSublists([], Sublist, [Count]) :- %CAS ESPECIAL QUAN LA LLISTA ACABA EN 'x'
-    Sublist \= [],  %ens assegurem que almenys hi ha alguna 'x'
-    length(Sublist, Count).
+countSublists([], Subcount, [Subcount]) :- %CAS ESPECIAL QUAN LA LLISTA ACABA EN 'x'
+    Subcount \= 0.  %ens assegurem que almenys hi ha alguna 'x'
 
-countSublists([' '|Ts], [], CountVect) :- %QUAN TROBEM UN ' ' I VENIM D'UN ' '
-    countSublists(Ts, [], CountVect).
+countSublists([' '|Ts], 0, CountVect) :- %QUAN TROBEM UN ' ' I VENIM D'UN ' '
+    countSublists(Ts, 0, CountVect).
 
-countSublists(['x'|Ts], Sublist, CountVect) :- %TROBEM UNA 'x', ANEM FENT APPEND FINS QUE ARRIBI UN ' ' (cas de sota)
-    append(Sublist, ['x'], NewSublist),
-    countSublists(Ts, NewSublist, CountVect).
+countSublists(['x'|Ts], Subcount, CountVect) :- %TROBEM UNA 'x', ANEM FENT APPEND FINS QUE ARRIBI UN ' ' (cas de sota)
+    NewSubcount is Subcount + 1,
+    countSublists(Ts, NewSubcount, CountVect).
 
-countSublists([' '|Ts], Sublist, [Count|CountVect]) :- %QUAN TROBEM UN ' ' I VENIM DE UNA 'x'
-    Sublist \= [],
-    length(Sublist, Count),
-    countSublists(Ts, [], CountVect).
+countSublists([' '|Ts], Subcount, [Subcount|CountVect]) :- %QUAN TROBEM UN ' ' I VENIM DE UNA 'x'
+    Subcount \= 0,
+    countSublists(Ts, 0, CountVect).
 
 %transpose(+Xs,Ys): Ys es la matriu (llista de llistes) Xs transposada. 
 % Assumim que es una matriu ben construida, es a dir, totes les files (subllistes) tenen la mateixa llargada.
@@ -37,7 +35,7 @@ transPrimeraColumna([[H|T]|Rows], [H|Hs], [T|Ts]) :- transPrimeraColumna(Rows, H
                                                                                     % llavors només queda cridar el mateix per a transposar la següent fila de la matriu.
 
 % ============================================ NONOBIDIREC =============================================
-generarFila(Len,[],X).
+generarFila(_,[],X).
 generarFila(Len, [Pista|Pistes],[Fila|Files]):-
     rowDef(Pista, Fila, Len),
     generarFila(Len, Pistes, Files).
