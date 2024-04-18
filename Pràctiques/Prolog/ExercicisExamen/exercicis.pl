@@ -67,3 +67,18 @@ multicojallista([M|Mc],[(M,Nombre)|L]):-
     count(M,[M|Mc],Nombre),
     remove(M,[M|Mc],AuxVec),
     multicojallista(AuxVec, L).
+
+
+arc(a,b).
+arc(b,a).
+arc(b,c).
+cami(X,Y):- arc(X,Y).
+cami(X,Z):- arc(X,Y), cami(Y,Z). %X==a, Z==c
+
+apend([],Ys,Ys).
+apend([X|Xs],Ys,[X|Zs]):- apend(Xs,Ys,Zs).
+
+permutation([],[]).
+permutation(L,[X|Xs]) :- append(V,[X|P],L),
+                         append(V,P,W),
+                         permutation(W,Xs).
