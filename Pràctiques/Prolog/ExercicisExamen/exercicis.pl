@@ -4,9 +4,9 @@
 % q(X):-p(X),!,p(X).
 
 
-% p(b).
-% p(a):-p(b).
-% p(X).
+p(b).
+p(a):-p(b).
+p(X).
 
 % canvia(LL,Old,New,LLN). tal que LLN sigui la llista LL on
 % s’han canviat totes les ocurrències de la llista Old per la llista New.
@@ -77,8 +77,3 @@ cami(X,Z):- arc(X,Y), cami(Y,Z). %X==a, Z==c
 
 apend([],Ys,Ys).
 apend([X|Xs],Ys,[X|Zs]):- apend(Xs,Ys,Zs).
-
-permutation([],[]).
-permutation(L,[X|Xs]) :- append(V,[X|P],L),
-                         append(V,P,W),
-                         permutation(W,Xs).
