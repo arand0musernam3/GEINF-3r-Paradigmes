@@ -1,3 +1,66 @@
+import Distribution.Simple.Utils (xargs)
+-- EXERCICIS PDF
+-- =============
+
+-- 2.1 Opera
+
+opera :: Num a => (a -> a -> a) -> [a] -> a
+opera _ [] = error "L'operador no pot ser una llista buida"
+opera _ [x] = error "La llista d'operands ha de ser mínim de llargada 2"
+opera op [x,y] = op x y
+opera op (x:y) = op x (opera op y)
+
+-- 2.2 Opera2
+opera2 :: Num a => (a -> a -> a) -> [a] -> [a]
+opera2 _ [] = []
+opera2 op [x,y] = [op x y]
+opera2 op [x,y,z] = [op x y , op y z]
+opera2 op (x:y:z) = op x y : opera2 op z
+
+-- 2.3 Filtra
+filtra :: (Integer -> Bool) -> [Integer] -> [Integer]
+filtra _ [] = []
+filtra op (x:y) = if op x
+    then x : filtra op y
+    else filtra op y
+
+-- 2.4 Rechaza
+rechaza :: (Integer -> Bool) -> [Integer] -> [Integer]
+rechaza _ [] = []
+rechaza op (x:y) = if op x
+    then filtra op y
+    else x : filtra op y
+
+
+-- rechaza_ :: (Integer -> Bool) -> [Integer] -> [Integer]
+-- rechaza_ _ [] = []
+-- rechaza_ op (x:y) = concat . not filtra op 
+-- NIDEA DE COM FER AQUEST
+
+
+-- 2.5 divideA
+divideA :: Integer -> Integer -> Bool
+divideA _ 0 = False
+divideA x y = mod x y == 0
+
+--2.6 divisores
+divisores :: Integer -> [Integer]
+divisores x = filtra (divideA x) [1..x]
+
+
+--2.7 mcd
+mcd :: Integer -> Integer -> Integer
+mcd 0 x = x
+mcd x 0 = x
+mcd x y
+    | x == y = x
+    | x > y = mcd (x-y) x
+    | otherwise = mcd x (y-x)
+
+    
+-- EXERCICIS GITHUB
+-- ================
+
 -- Ex 1: defineix els operadors --> , <--> (implicacio i equivalencia)
 -- --> te prioritat 2
 -- <--> te prioritat 1
@@ -69,7 +132,7 @@ map2 f (a:xa) (b:xb) = (f a b) : map2 f xa xb
 
 maybeMap :: (a -> Maybe b) -> [a] -> [b]
 maybeMap _ [] = []
-maybeMap f (a:xa) = 
+maybeMap f (a:xa) =
     case f a of
         Nothing -> maybeMap f xa
         Just b -> b : maybeMap f xa
