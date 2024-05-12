@@ -1,3 +1,6 @@
+import Data.List
+
+
 type Nom = String
 
 infixl 7 :/\
@@ -34,13 +37,16 @@ avaluar (p :/\ q) as = avaluar p as && avaluar q as
 avaluar (p :\/ q) as = avaluar p as || avaluar q as
 
 -- Exercici 2
+(+:) :: Eq a => a -> [a] -> [a]
+infix 5 +:
+(+:) a b
+  | a `elem` b = b
+  | otherwise = a:b
 
-(+++) :: [a] -> [a] -> [a]
-xs +++ [] = xs
-[] +++ ys = ys
-(x : xs) +++ ys = x : (xs +++ ys)
---- https://es.stackoverflow.com/questions/353009/comprender-foldl-y-foldr-haskell
+(+++) :: Eq a => [a] -> [a] -> [a]
+(+++) a b = foldr (+:) b a
 
+-- Exercici 3
 variables :: Prop -> [Nom]
 variables (Const _) = []
 variables (Var x) = [x]
