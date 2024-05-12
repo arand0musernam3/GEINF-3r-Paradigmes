@@ -11,6 +11,9 @@ joinToLength x s = [a++b | a <- s, b <- s, (length a + length b) == x]
 -- foldl (+) 0 [1..4]
 -- ((((0+1) + 2) + 3) + 4)
 
+-- A la funció f del foldl, l'acumulat és el primer paràmetre i l'actual és el segon
+-- En el cas del foldr, l'actual és el primer paràmetre i l'acumulat és el segon
+
 -- Implementació del concat amb un fold
 -- ghci> concat [[1,2],[3,4]]
 -- [1,2,3,4]
@@ -59,9 +62,6 @@ sumSuccess = foldl (f) (Left "no data")
         f (Left _) d = d
         f (Right x) (Left _) = Right x
         f (Right x) (Right y) = Right(x+y)
-
--- A la funció f del foldl, l'acumulat és el primer paràmetre i l'actual és el segon
--- En el cas del foldr, l'actual és el primer paràmetre i l'acumulat és el segon
 
 -- Ex 3: recall the binary function composition operation
 -- (f . g) x = f (g x). In this exercise, your task is to define a function

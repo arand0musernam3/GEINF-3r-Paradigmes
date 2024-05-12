@@ -1,4 +1,5 @@
 import Data.List
+import Control.Monad (replicateM)
 
 
 type Nom = String
@@ -46,8 +47,15 @@ infix 5 +:
 (+++) :: Eq a => [a] -> [a] -> [a]
 (+++) a b = foldr (+:) b a
 
--- Exercici 3
 variables :: Prop -> [Nom]
 variables (Const _) = []
 variables (Var x) = [x]
 variables (No p) = variables p
+variables (p :/\ q) = (variables p) +++ (variables q)
+variables (p :\/ q) = (variables p) +++ (variables q)
+
+-- Exercici 3
+combinations :: [a] -> [[(a, Bool)]]
+combinations xs = map (zip xs) boolCombs
+    where
+      boolCombs = replicateM (length xs) [True, False]
