@@ -1,4 +1,3 @@
-import Distribution.Simple.Utils (xargs)
 -- EXERCICIS PDF
 -- =============
 
@@ -24,18 +23,17 @@ filtra op (x:y) = if op x
     then x : filtra op y
     else filtra op y
 
+-- ja existeix com a filter en el haskell
+
 -- 2.4 Rechaza
 rechaza :: (Integer -> Bool) -> [Integer] -> [Integer]
-rechaza _ [] = []
-rechaza op (x:y) = if op x
-    then filtra op y
-    else x : filtra op y
+-- rechaza _ [] = []
+-- rechaza op (x:y) = if op x
+--     then filtra op y
+--     else x : filtra op y
 
-
--- rechaza_ :: (Integer -> Bool) -> [Integer] -> [Integer]
--- rechaza_ _ [] = []
--- rechaza_ op (x:y) = concat . not filtra op 
--- NIDEA DE COM FER AQUEST
+-- rechaza f l = filtra (not.f) l
+rechaza f = filtra (not.f)
 
 
 -- 2.5 divideA
