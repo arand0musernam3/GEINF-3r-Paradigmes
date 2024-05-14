@@ -14,7 +14,6 @@ data Prop
   | No Prop
   | Prop :/\ Prop
   | Prop :\/ Prop
-  deriving (Show)
 
 e1, e2, e3 :: Prop
 e1 = Const True :/\ Var "a"
@@ -22,7 +21,7 @@ e2 = Var "a" :/\ No (Var "a")
 e3 = (Var "a" :/\ Var "b") :\/ No (Var "c")
 
 -- Exercici 1
-data Assig = Nom :-> Bool deriving (Show)
+data Assig = Nom :-> Bool
 
 type Assignacio = [Assig]
 
@@ -55,7 +54,75 @@ variables (p :/\ q) = (variables p) +++ (variables q)
 variables (p :\/ q) = (variables p) +++ (variables q)
 
 -- Exercici 3
-combinations :: [a] -> [[(a, Bool)]]
-combinations xs = map (zip xs) boolCombs
+assignacionsPossibles :: [Nom] -> [Assignacio]
+assignacionsPossibles xs = map (f xs) boolCombs
     where
       boolCombs = replicateM (length xs) [True, False]
+      f :: [Nom] -> [Bool] -> Assignacio
+      f [] [] = []
+      f (n:ns) (b:bs) = n :-> b : f ns bs
+-- https://chat.openai.com/share/8b34a5c4-2259-4bab-88a1-fc8bcfd1ea91
+
+
+-- Exercici 4 PASSAR A SOLUCIÓ AMB MAP I OR
+esSatisfactible :: Prop -> Bool
+esSatisfactible p = esSatisfactible' p (assignacionsPossibles (variables p))
+
+esSatisfactible' :: Prop -> [Assignacio] -> Bool
+esSatisfactible' _ [] = False
+esSatisfactible' p (x:xs)
+  | avaluar p x = True
+  | otherwise = esSatisfactible' p xs
+
+
+-- Exercici 5 PASSAR A SOLUCIÓ AMB MAP I AND
+esTautologia :: Prop -> Bool
+esTautologia p = esTautologia' p (assignacionsPossibles (variables p))
+
+esTautologia' :: Prop -> [Assignacio] -> Bool
+esTautologia' _ [] = True
+esTautologia' p (x:xs)
+  | not (avaluar p x) = False
+  | otherwise = esTautologia' p xs
+
+-- Exercici 6
+infixl 5 --> 
+(-->) :: Prop -> Prop -> Prop
+a --> b = No a :\/ b
+
+infixl 5 ==>
+(==>) :: Prop -> Prop -> Bool
+a ==> b = esTautologia (a --> b)
+
+-- Exercici 7
+infixl 4 <-->
+(<-->) :: Prop -> Prop -> Prop
+a <--> b = (a --> b) :/\ (b --> a)
+
+infixl 4 <==>
+(<==>) :: Prop -> Prop -> Bool
+a <==> b = esTautologia (a <--> b)
+
+-- ghci> No (No (Var "a")) <==> Var "a"
+-- True
+-- ghci> No (Var "a" :/\ Var "b") <==> No (Var "a") :\/ No (Var "b")
+-- True
+-- ghci> No (Var "a" :\/ Var "b") <==> No (Var "a") :/\ No (Var "b")
+-- True
+-- ghci> Var "a" --> Var "b" <==> No (Var "b") --> No (Var "a")
+-- True
+-- ghci> Var "a" :/\ (Var "a" --> Var "b") <==> Var "b"
+-- False
+-- ghci> Var "a" :/\ (Var "a" --> Var "b") ==> Var "b"
+-- True
+
+-- Exercici 8
+instance Show Prop where
+    show (Const b) = show b
+    show (Var x) = x
+    show (No p) = "!" ++ show p
+    show (p :/\ q) = "(" ++ show p ++ " /\\ " ++ show q ++ ")" 
+    show (p :\/ q) = "(" ++ show p ++ " \\/ " ++ show q ++ ")" 
+
+instance Show Assig where
+    show (a :-> b) = a ++ ":=" ++ show b
