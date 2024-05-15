@@ -1,5 +1,6 @@
 import Data.List
 import Control.Monad (replicateM)
+import qualified GHC.TypeLits as possibles
 
 
 type Nom = String
@@ -126,3 +127,45 @@ instance Show Prop where
 
 instance Show Assig where
     show (a :-> b) = a ++ ":=" ++ show b
+
+  
+--Exercici 9
+
+sat :: Prop -> Maybe Assignacio
+sat p = sat' p (assignacionsPossibles (variables p))
+
+sat' :: Prop -> [Assignacio] -> Maybe Assignacio
+sat' _ [] = Nothing
+sat' p (x:xs)
+  | avaluar p x = Just x
+  | otherwise = sat' p xs
+
+
+
+-- Exercici 10
+type Weight = Int
+data WProp = Hard Prop | Soft Prop Weight
+
+me1, me2, me3, me4 :: [WProp]
+me1=[Soft (Var "x") 10, Soft (No (Var "x")) 4]
+me2=[Hard (Var "x"), Hard (Var "y"), Hard ((No (Var "x")) :\/ (No (Var "y")))]
+me3=[Hard (Var "x"), Hard ((No (Var "x")) :\/ (No (Var "y"))),Soft (Var "x") 10, 
+ Soft (No (Var "x")) 4, Soft (Var "y") 5, Soft (Var "z") 10, Soft (No (Var "z")) 4]
+me4=[Soft ((No (Var "x")) :\/ (No (Var "y"))) 4, Soft ((Var "x") :\/ (Var "y")) 4, 
+ Soft ((No (Var "x")) :\/ (No (Var "z"))) 3, Soft ((Var "x") :\/ (Var "z")) 3, 
+ Soft ((No (Var "z")) :\/ (No (Var "y"))) 5, Soft ((Var "z") :\/ (Var "y")) 5]
+
+
+maxSat::[WProp]->Maybe (Assignacio, Weight)
+maxSat [] = Nothing
+maxSat (Hard x : xs) = 
+    case eval of
+        Nothing -> Nothing
+        Just x -> maxSat xs
+    where eval = sat x
+
+-- hauria de ser quelcom de l'estil
+-- 1. fer crida que generi, per totes les variables de totes les preposicions, totes les assignacions possibles
+--      també afegir un paràmetre amb valor inicial 0 que anirà acumulant totes les soft que no es poden validar
+--      no sé si s'haurien de comprovar primer totes les hard i després anar a per les soft amb les assignacions que han quedat lliures
+-- 2. per cada crida recursiva, retornar totes les assignacions que han permès validar aquella hard
