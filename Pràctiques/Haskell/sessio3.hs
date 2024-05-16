@@ -5,7 +5,7 @@ joinToLength x s = [a++b | a <- s, b <- s, (length a + length b) == x]
 
 -- Explicació foldr
 
--- foldr (+) 0 [1,2,3,4] és el mateix que:
+-- foldr (+) 0 [1,2,3,4] és el mateix que: (+) a b
 -- 1 + ( 2 + ( 3 + (4 + 0 ) ) ) 
 
 -- foldl (+) 0 [1..4]
@@ -57,11 +57,13 @@ joinToLength x s = [a++b | a <- s, b <- s, (length a + length b) == x]
 -- Give the signature of the function
 
 sumSuccess :: [Either String Integer] -> Either String Integer
-sumSuccess = foldl (f) (Left "no data")
-    where 
-        f (Left _) d = d
+sumSuccess = foldl f (Left "no data")
+    where
+        f :: Either String Integer -> Either String Integer -> Either String Integer
+        f (Left _) (Left _) = Left "no data"
+        f (Left _) (Right d) = Right d
         f (Right x) (Left _) = Right x
-        f (Right x) (Right y) = Right(x+y)
+        f (Right x) (Right y) = Right (x+y)
 
 -- Ex 3: recall the binary function composition operation
 -- (f . g) x = f (g x). In this exercise, your task is to define a function
@@ -83,6 +85,7 @@ sumSuccess = foldl (f) (Left "no data")
 multiCompose :: [t -> t] -> (t -> t)
 multiCompose = foldr (.) id
 -- estic plorant, és precios
+
 
 
 -- Idees útils per la pràctica!!
