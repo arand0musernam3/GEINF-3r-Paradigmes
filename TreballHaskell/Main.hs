@@ -22,7 +22,7 @@ data Assig = Nom :-> Bool
 type Assignacio = [Assig]
 
 valorDe :: Nom -> Assignacio -> Bool
-valorDe _ [] = False
+valorDe _ [] = error "no s'ha trobat la variable"
 valorDe n ((a :-> b) : xs) = if n == a then b else valorDe n xs
 
 avaluar :: Prop -> Assignacio -> Bool
@@ -146,6 +146,7 @@ instance Ord WProp where
   (Hard _) <= (Soft _ _) = True
   (Soft _ _) <= (Hard _) = False
 
+
 me1, me2, me3, me4 :: [WProp]
 me1 = [Soft (Var "x") 10, Soft (No (Var "x")) 4]
 me2 = [Hard (Var "x"), Hard (Var "y"), Hard ((No (Var "x")) :\/ (No (Var "y")))]
@@ -172,14 +173,27 @@ filterHards a = case a of
   Hard _ -> True
   Soft _ _ -> False
 
-maxSat :: [WProp] -> Maybe (Assignacio, Weight)
-maxSat [] = Nothing
-maxSat ls = filter (not.filterHards) ls
 
--- maxSat ls =
---  maxSat' sorted assignations
---  where assignations = allSatisfiableAssignations sorted (assignacionsPossibles vars)
---        vars = allVariables sorted
+maxSat :: [WProp] -> Maybe (Assignacio, Weight)
+maxSat ls = returnMin [foldr (f x) (Just ([], 0)) ls | x <- lass]
+  where
+    lass = assignacionsPossibles (allVariables ls)
+    f :: Assignacio -> WProp -> Maybe (Assignacio, Weight) -> Maybe (Assignacio, Weight)
+    f _ _ Nothing = Nothing
+    f assig (Soft p w) (Just(_, z)) = if avaluar p assig
+      then Just (assig, z)
+      else Just (assig, w+z)
+    f assig (Hard p) (Just(_,z)) = if avaluar p assig
+      then Just (assig, z)
+      else Nothing
+
+returnMin :: [Maybe (Assignacio, Weight)] -> Maybe (Assignacio, Weight)
+returnMin = foldr f Nothing
+  where
+    f :: Maybe(Assignacio, Weight) -> Maybe(Assignacio, Weight) -> Maybe (Assignacio, Weight)
+    f Nothing d = d
+    f (Just x) Nothing = Just x
+    f (Just (a, w)) (Just (b,z)) = if w < z then Just (a,w) else Just (b,z)
 
 allVariables :: [WProp] -> [Nom]
 allVariables [] = []
@@ -187,30 +201,3 @@ allVariables (x : xs) =
   case x of
     Hard x -> variables x +++ allVariables xs
     Soft x _ -> variables x +++ allVariables xs
-
-minAssignation :: [Weight] -> Weight
-minAssignation (x : xs) = foldl min x (x : xs)
-
-propHard :: [WProp] -> [Prop]
-propHard ls = map g (filter filterHards ls)
-  where
-    g :: WProp -> Prop
-    g a = case a of
-      Hard x -> x
-      Soft x _ -> x
-
-assignacionsSatisfanProposicio :: WProp -> [Assignacio] -> [Assignacio]
-assignacionsSatisfanProposicio (Hard p) = filter (avaluar p)
-assignacionsSatisfanProposicio (Soft p _) = filter (avaluar p)
-
-assignacionsSatisfan :: [WProp] -> [Assignacio] -> [Assignacio]
-assignacionsSatisfan lprop lass = foldr ((+++) . (`assignacionsSatisfanProposicio` lass)) [] lprop
--- foldr (+++) [] (map (\x -> assignacionsSatisfanProposicio x lass) lprop)
-
--- primer agafar totes les hard i trobar totes les assignacions possibles que les satisfan
-
--- hauria de ser quelcom de l'estil
--- 1. fer crida que generi, per totes les variables de totes les preposicions, totes les assignacions possibles
---      també afegir un paràmetre amb valor inicial 0 que anirà acumulant totes les soft que no es poden validar
---      no sé si s'haurien de comprovar primer totes les hard i després anar a per les soft amb les assignacions que han quedat lliures
--- 2. per cada crida recursiva, retornar totes les assignacions que han permès validar aquella hard
