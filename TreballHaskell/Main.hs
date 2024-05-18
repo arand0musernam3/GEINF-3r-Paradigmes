@@ -1,4 +1,3 @@
-import Control.Monad (replicateM)
 import Data.List
 
 type Nom = String
@@ -48,19 +47,12 @@ variables :: Prop -> [Nom]
 variables (Const _) = []
 variables (Var x) = [x]
 variables (No p) = variables p
-variables (p :/\ q) = (variables p) +++ (variables q)
-variables (p :\/ q) = (variables p) +++ (variables q)
+variables (p :/\ q) = variables p +++ variables q
+variables (p :\/ q) = variables p +++ variables q
 
 -- Exercici 3
 assignacionsPossibles :: [Nom] -> [Assignacio]
-assignacionsPossibles xs = map (f xs) boolCombs
-  where
-    boolCombs = replicateM (length xs) [True, False]
-    f :: [Nom] -> [Bool] -> Assignacio
-    f [] [] = []
-    f (n : ns) (b : bs) = n :-> b : f ns bs
--- Es pot fer amb un map de map diria, S'HA DE REFER AQUESTA SOLUCIÓ NO ÉS DEFINITIVA!!
--- https://chat.openai.com/share/8b34a5c4-2259-4bab-88a1-fc8bcfd1ea91
+assignacionsPossibles = mapM (\x -> [x :-> True, x :-> False]) -- simplificació de sequence + map
 
 -- Exercici 4 PASSAR A SOLUCIÓ AMB MAP I OR
 esSatisfactible :: Prop -> Bool
