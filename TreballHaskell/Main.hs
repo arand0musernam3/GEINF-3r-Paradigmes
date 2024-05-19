@@ -54,11 +54,11 @@ variables (p :\/ q) = variables p +++ variables q
 assignacionsPossibles :: [Nom] -> [Assignacio]
 assignacionsPossibles = mapM (\x -> [x :-> True, x :-> False]) -- simplificació de sequence + map
 
--- Exercici 4 PASSAR A SOLUCIÓ AMB MAP I OR
+-- Exercici 4 
 esSatisfactible :: Prop -> Bool
 esSatisfactible p = any (avaluar p) (assignacionsPossibles (variables p))
 
--- Exercici 5 PASSAR A SOLUCIÓ AMB MAP I AND
+-- Exercici 5
 esTautologia :: Prop -> Bool
 esTautologia p = all (avaluar p) (assignacionsPossibles (variables p))
 
