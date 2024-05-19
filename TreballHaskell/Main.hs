@@ -127,17 +127,6 @@ type Weight = Int
 
 data WProp = Hard Prop | Soft Prop Weight deriving (Show)
 
-instance Eq WProp where
-  (Hard _) == (Hard _) = True
-  (Soft _ _) == (Soft _ _) = True
-  _ == _ = False
-
-instance Ord WProp where
-  (Hard _) <= (Hard _) = True
-  (Soft _ _) <= (Soft _ _) = True
-  (Hard _) <= (Soft _ _) = True
-  (Soft _ _) <= (Hard _) = False
-
 
 me1, me2, me3, me4 :: [WProp]
 me1 = [Soft (Var "x") 10, Soft (No (Var "x")) 4]
@@ -159,12 +148,6 @@ me4 =
     Soft ((No (Var "z")) :\/ (No (Var "y"))) 5,
     Soft ((Var "z") :\/ (Var "y")) 5
   ]
-
-filterHards :: WProp -> Bool
-filterHards a = case a of
-  Hard _ -> True
-  Soft _ _ -> False
-
 
 maxSat :: [WProp] -> Maybe (Assignacio, Weight)
 maxSat ls = returnMin [foldr (f x) (Just ([], 0)) ls | x <- lass]
