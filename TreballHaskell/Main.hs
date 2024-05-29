@@ -1,5 +1,3 @@
-import Data.List
-
 type Nom = String
 infixl 7 :/\
 infixl 6 :\/
@@ -21,7 +19,7 @@ data Assig = Nom :-> Bool
 type Assignacio = [Assig]
 
 valorDe :: Nom -> Assignacio -> Bool
-valorDe _ [] = error "no s'ha trobat la variable"
+valorDe _ [] = error "No s'ha trobat la variable"
 valorDe n ((a :-> b) : xs) = if n == a then b else valorDe n xs
 
 avaluar :: Prop -> Assignacio -> Bool
@@ -33,9 +31,6 @@ avaluar (p :\/ q) as = avaluar p as || avaluar q as
 
 -- Exercici 2
 (+:) :: (Eq a) => a -> [a] -> [a]
-
-infix 5 +:
-
 (+:) a b
   | a `elem` b = b
   | otherwise = a : b
@@ -52,35 +47,38 @@ variables (p :\/ q) = variables p +++ variables q
 
 -- Exercici 3
 assignacionsPossibles :: [Nom] -> [Assignacio]
-assignacionsPossibles = mapM (\x -> [x :-> True, x :-> False]) -- simplificació de sequence + map
+assignacionsPossibles n = sequence (map (\x -> [x :-> True, x :-> False]) n)
+-- Es pot simplificar a "assignacionsPossibles = mapM (\x -> [x :-> True, x :-> False])"
+
+-- Una alternativa sense map és la següent:
+-- assignacionsPossibles [] = [[]]
+-- assignacionsPossibles (x:xs) = [(x :-> b) : s | b <- [True,False], s <- assignacionsPossibles xs]
 
 -- Exercici 4 
 esSatisfactible :: Prop -> Bool
-esSatisfactible p = any (avaluar p) (assignacionsPossibles (variables p))
+esSatisfactible p = or (map (avaluar p) (assignacionsPossibles (variables p)))
+-- Es pot simplificar a "esSatisfactible p = any (avaluar p) (assignacionsPossibles (variables p))""
 
 -- Exercici 5
 esTautologia :: Prop -> Bool
-esTautologia p = all (avaluar p) (assignacionsPossibles (variables p))
+esTautologia p = and (map (avaluar p) (assignacionsPossibles (variables p)))
+-- Es pot simplificar a "esTautologia p = all (avaluar p) (assignacionsPossibles (variables p))"
 
 -- Exercici 6
 infixl 5 -->
-
 (-->) :: Prop -> Prop -> Prop
 a --> b = No a :\/ b
 
 infixl 5 ==>
-
 (==>) :: Prop -> Prop -> Bool
 a ==> b = esTautologia (a --> b)
 
 -- Exercici 7
 infixl 4 <-->
-
 (<-->) :: Prop -> Prop -> Prop
 a <--> b = (a --> b) :/\ (b --> a)
 
 infixl 4 <==>
-
 (<==>) :: Prop -> Prop -> Bool
 a <==> b = esTautologia (a <--> b)
 
@@ -109,10 +107,19 @@ instance Show Assig where
   show (a :-> b) = a ++ ":=" ++ show b
 
 instance Eq Assig where
-  a :-> b == c :-> d =  a == c && b == d
+  a :-> b == c :-> d = a == c && b == d
+
+assignacionsIguals :: Assignacio -> Assignacio -> Bool
+assignacionsIguals a1 a2 = (a1 +++ a2) == a2 && (a2 +++ a1) == a1
 
 -- Exercici 9
+sat :: Prop -> Maybe Assignacio
+sat p
+  | esSatisfactible p = Just (head [a | a <- assignacionsPossibles (variables p), avaluar p a])
+  | otherwise = Nothing
 
+-- Proposem també aquesta solució menys elegant, però més eficient (doncs s'atura a la primera solució)
+{-
 sat :: Prop -> Maybe Assignacio
 sat p = sat' p (assignacionsPossibles (variables p))
 
@@ -121,6 +128,7 @@ sat' _ [] = Nothing
 sat' p (x : xs)
   | avaluar p x = Just x
   | otherwise = sat' p xs
+-}
 
 -- Exercici 10
 type Weight = Int
