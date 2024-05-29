@@ -133,7 +133,7 @@ sat' p (x : xs)
 -- Exercici 10
 type Weight = Int
 
-data WProp = Hard Prop | Soft Prop Weight deriving (Show)
+data WProp = Hard Prop | Soft Prop Weight
 
 
 me1, me2, me3, me4 :: [WProp]
@@ -184,3 +184,7 @@ allVariables (x : xs) =
   case x of
     Hard x -> variables x +++ allVariables xs
     Soft x _ -> variables x +++ allVariables xs
+
+instance Show WProp where
+  show (Hard p) = show p
+  show (Soft p w) = "(" ++ show p ++ "," ++ show w ++ ")"
